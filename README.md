@@ -68,6 +68,7 @@ The backend listens to Binance’s WebSocket and broadcasts updates to connected
 
 The frontend displays prices with live updates and charts.
 
+```
 
 ![alt text](image.png)
 
