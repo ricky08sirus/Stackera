@@ -11,8 +11,6 @@ from app.websocket_server import websocket_endpoint, broadcast_price_updates
 import asyncio
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="app/templates")
 
 @app.on_event("startup")
 async def startup_event():
@@ -26,10 +24,12 @@ async def startup_event():
 async def shutdown_event():
     logger.info("Shutting down Crypto Streamer App...")
 
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/")
+async def root():
+    return {"message": "Crypto Streamer API is running"}
+
+    
 @app.websocket("/ws")
 async def websocket_handler(websocket: WebSocket):
     await websocket_endpoint(websocket)
