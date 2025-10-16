@@ -62,7 +62,7 @@ socket.onclose = () => console.log("❌ Disconnected from WebSocket");
 
 Notes
 
-Make sure your .env file (if any) is properly configured and not pushed to Git.
+Make sure your .env file (if any) is properly configured .
 
 The backend listens to Binance’s WebSocket and broadcasts updates to connected clients.
 
