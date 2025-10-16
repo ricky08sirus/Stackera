@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Crypto Trading Platform</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: #0a0e27;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #e0e6ed;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #0f1729 0%, #1a1f3a 100%);
+    border-bottom: 1px solid #1e2742;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .logo {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #00f5ff 0%, #0080ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 40px;
+    font-size: 0.85rem;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-label {
+    color: #6b7280;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-value {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .stat-value.green {
+    color: #10b981;
+  }
+
+  .stat-value.red {
+    color: #ef4444;
+  }
+
+  /* Main Container */
+  .container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 30px;
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+  }
+
+  /* Left Panel - Main Chart */
+  .main-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .panel {
+    background: linear-gradient(135deg, #131a35 0%, #1a2341 100%);
+    border: 1px solid #1e2742;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  .price-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+  }
+
+  .asset-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .asset-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #f7931a 0%, #ff9c00 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 16px rgba(247, 147, 26, 0.4);
+  }
+
+  .asset-details h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .asset-name {
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+
+  .price-display {
+    text-align: right;
+  }
+
+  .current-price {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #00f5ff 0%, #0080ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .price-change {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .price-change.up {
+    color: #10b981;
+  }
+
+  .price-change.down {
+    color: #ef4444;
+  }
+
+  .arrow {
+    font-size: 1.5rem;
+  }
+
+  /* Chart Container */
+  .chart-container {
+    height: 450px;
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .chart-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .chart-btn {
+    padding: 8px 16px;
+    background: #1a2341;
+    border: 1px solid #2a3654;
+    border-radius: 8px;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .chart-btn:hover {
+    background: #2a3654;
+    color: #e0e6ed;
+  }
+
+  .chart-btn.active {
+    background: linear-gradient(135deg, #00f5ff 0%, #0080ff 100%);
+    color: #0a0e27;
+    border-color: transparent;
+  }
+
+  /* Right Panel - Trading Info */
+  .side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .panel-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-icon {
+    width: 8px;
+    height: 8px;
+    background: #00f5ff;
+    border-radius: 50%;
+    box-shadow: 0 0 12px #00f5ff;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+      box-shadow: 0 0 12px #00f5ff;
+    }
+    50% {
+      opacity: 0.6;
+      box-shadow: 0 0 8px #00f5ff;
+    }
+  }
+
+  /* Market Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .stat-box {
+    background: #0f1729;
+    border: 1px solid #1e2742;
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .stat-box-label {
+    color: #6b7280;
+    font-size: 0.75rem;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-box-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #e0e6ed;
+  }
+
+  /* Order Book */
+  .order-book {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .order-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .order-row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--width);
+    opacity: 0.15;
+    z-index: 0;
+  }
+
+  .order-row.buy::before {
+    background: #10b981;
+  }
+
+  .order-row.sell::before {
+    background: #ef4444;
+  }
+
+  .order-row > span {
+    position: relative;
+    z-index: 1;
+  }
+
+  .order-price {
+    font-weight: 700;
+  }
+
+  .order-row.buy .order-price {
+    color: #10b981;
+  }
+
+  .order-row.sell .order-price {
+    color: #ef4444;
+  }
+
+  /* Recent Trades */
+  .trades-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .trades-list::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .trades-list::-webkit-scrollbar-track {
+    background: #0f1729;
+    border-radius: 3px;
+  }
+
+  .trades-list::-webkit-scrollbar-thumb {
+    background: #2a3654;
+    border-radius: 3px;
+  }
+
+  .trade-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #0f1729;
+    border: 1px solid #1e2742;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .trade-price {
+    font-weight: 700;
+  }
+
+  .trade-item.buy .trade-price {
+    color: #10b981;
+  }
+
+  .trade-item.sell .trade-price {
+    color: #ef4444;
+  }
+
+  .trade-time {
+    color: #6b7280;
+    font-size: 0.75rem;
+  }
+
+  /* Volume Bars */
+  .volume-container {
+    height: 100px;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    margin-top: 16px;
+  }
+
+  .volume-bar {
+    flex: 1;
+    background: linear-gradient(180deg, #00f5ff 0%, #0080ff 100%);
+    border-radius: 4px 4px 0 0;
+    min-height: 10px;
+    transition: height 0.3s ease;
+    opacity: 0.7;
+  }
+
+  .volume-bar:hover {
+    opacity: 1;
+  }
+
+  /* Footer Stats */
+  .bottom-stats {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .container {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .header {
+      padding: 16px 20px;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .header-stats {
+      gap: 20px;
+      font-size: 0.75rem;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .current-price {
+      font-size: 2rem;
+    }
+
+    .chart-container {
+      height: 300px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo">Stackera.io</div>
+  <div class="header-stats">
+    <div class="stat-item">
+      <span class="stat-label">Market Cap</span>
+      <span class="stat-value" id="marketCap">$1.2T</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">24h Volume</span>
+      <span class="stat-value green" id="volume24h">$84.5B</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">BTC Dominance</span>
+      <span class="stat-value" id="btcDom">54.2%</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Container -->
+<div class="container">
+  <!-- Left Panel -->
+  <div class="main-panel">
+    <div class="panel">
+      <div class="price-header">
+        <div class="asset-info">
+          <div class="asset-icon">₿</div>
+          <div class="asset-details">
+            <h2 id="symbol">BTC/USDT</h2>
+            <div class="asset-name">Bitcoin</div>
+          </div>
+        </div>
+        <div class="price-display">
+          <div class="current-price" id="price">--</div>
+          <div class="price-change" id="change">
+            <span class="arrow">▲</span>
+            <span id="changeText">--</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-controls">
+        <button class="chart-btn active">1H</button>
+        <button class="chart-btn">4H</button>
+        <button class="chart-btn">1D</button>
+        <button class="chart-btn">1W</button>
+        <button class="chart-btn">1M</button>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="mainChart"></canvas>
+      </div>
+
+      <div class="volume-container" id="volumeBars"></div>
+    </div>
+
+    <!-- Bottom Stats -->
+    <div class="bottom-stats">
+      <div class="panel">
+        <div class="stat-box-label">24h High</div>
+        <div class="stat-box-value" id="high24h">--</div>
+      </div>
+      <div class="panel">
+        <div class="stat-box-label">24h Low</div>
+        <div class="stat-box-value" id="low24h">--</div>
+      </div>
+      <div class="panel">
+        <div class="stat-box-label">24h Volume (BTC)</div>
+        <div class="stat-box-value" id="volumeBtc">--</div>
+      </div>
+      <div class="panel">
+        <div class="stat-box-label">24h Volume (USDT)</div>
+        <div class="stat-box-value" id="volumeUsdt">--</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="side-panel">
+    <!-- Market Stats -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon"></div>
+        Market Stats
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-box-label">Open</div>
+          <div class="stat-box-value" id="openPrice">--</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">Close</div>
+          <div class="stat-box-value" id="closePrice">--</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">Trades</div>
+          <div class="stat-box-value" id="tradesCount">--</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">Avg Price</div>
+          <div class="stat-box-value" id="avgPrice">--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Book -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon"></div>
+        Order Book
+      </div>
+      <div class="order-book" id="orderBook"></div>
+    </div>
+
+    <!-- Recent Trades -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon"></div>
+        Recent Trades
+      </div>
+      <div class="trades-list" id="tradesList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+  // Elements
+  const priceEl = document.getElementById('price');
+  const changeEl = document.getElementById('change');
+  const changeTextEl = document.getElementById('changeText');
+  const high24hEl = document.getElementById('high24h');
+  const low24hEl = document.getElementById('low24h');
+  const volumeBtcEl = document.getElementById('volumeBtc');
+  const volumeUsdtEl = document.getElementById('volumeUsdt');
+  const openPriceEl = document.getElementById('openPrice');
+  const closePriceEl = document.getElementById('closePrice');
+  const tradesCountEl = document.getElementById('tradesCount');
+  const avgPriceEl = document.getElementById('avgPrice');
+  const orderBookEl = document.getElementById('orderBook');
+  const tradesListEl = document.getElementById('tradesList');
+  const volumeBarsEl = document.getElementById('volumeBars');
+
+  // Data storage
+  const priceHistory = [];
+  const maxPoints = 50;
+  const trades = [];
+  const maxTrades = 15;
+
+  // Chart
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  const mainChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Price',
+        data: [],
+        fill: true,
+        backgroundColor: (context) => {
+          const ctx = context.chart.ctx;
+          const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+          gradient.addColorStop(0, 'rgba(0, 245, 255, 0.3)');
+          gradient.addColorStop(1, 'rgba(0, 245, 255, 0)');
+          return gradient;
+        },
+        borderColor: '#00f5ff',
+        borderWidth: 3,
+        tension: 0.4,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: '#00f5ff',
+        pointHoverBorderColor: '#fff',
+        pointHoverBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: 'index'
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a2341',
+          titleColor: '#e0e6ed',
+          bodyColor: '#e0e6ed',
+          borderColor: '#2a3654',
+          borderWidth: 1,
+          padding: 12,
+          displayColors: false,
+          callbacks: {
+            label: (context) => {
+              return `$${context.parsed.y.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          display: true,
+          grid: {
+            color: '#1e2742',
+            drawBorder: false
+          },
+          ticks: {
+            color: '#6b7280',
+            maxTicksLimit: 10
+          }
+        },
+        y: {
+          display: true,
+          position: 'right',
+          grid: {
+            color: '#1e2742',
+            drawBorder: false
+          },
+          ticks: {
+            color: '#6b7280',
+            callback: (value) => {
+              return '$' + value.toLocaleString();
+            }
+          }
+        }
+      },
+      animation: {
+        duration: 750,
+        easing: 'easeInOutQuart'
+      }
+    }
+  });
+
+  // Generate volume bars
+  function generateVolumeBars() {
+    volumeBarsEl.innerHTML = '';
+    for (let i = 0; i < 30; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'volume-bar';
+      const height = Math.random() * 80 + 20;
+      bar.style.height = height + '%';
+      volumeBarsEl.appendChild(bar);
+    }
+  }
+
+  // Generate order book
+  function generateOrderBook(currentPrice) {
+    const orders = [];
+    
+    // Sell orders (above current price)
+    for (let i = 0; i < 5; i++) {
+      const price = currentPrice + (Math.random() * 50 + 10);
+      const amount = Math.random() * 2;
+      orders.push({
+        type: 'sell',
+        price: price,
+        amount: amount,
+        total: price * amount
+      });
+    }
+    
+    // Buy orders (below current price)
+    for (let i = 0; i < 5; i++) {
+      const price = currentPrice - (Math.random() * 50 + 10);
+      const amount = Math.random() * 2;
+      orders.push({
+        type: 'buy',
+        price: price,
+        amount: amount,
+        total: price * amount
+      });
+    }
+
+    orderBookEl.innerHTML = orders.map(order => {
+      const width = Math.min(order.amount / 2 * 100, 100);
+      return `
+        <div class="order-row ${order.type}" style="--width: ${width}%">
+          <span class="order-price">${order.price.toFixed(2)}</span>
+          <span>${order.amount.toFixed(4)}</span>
+          <span>${order.total.toFixed(2)}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Add trade
+  function addTrade(price, type) {
+    const trade = {
+      price: price,
+      amount: (Math.random() * 0.5 + 0.1).toFixed(4),
+      type: type,
+      time: new Date().toLocaleTimeString()
+    };
+
+    trades.unshift(trade);
+    if (trades.length > maxTrades) trades.pop();
+
+    tradesListEl.innerHTML = trades.map(t => `
+      <div class="trade-item ${t.type}">
+        <span class="trade-price">$${t.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        <span>${t.amount} BTC</span>
+        <span class="trade-time">${t.time}</span>
+      </div>
+    `).join('');
+  }
+
+  // WebSocket connection
+  const socket = new WebSocket("ws://127.0.0.1:8000/ws");
+
+  socket.onopen = () => {
+    console.log("✅ Connected to WebSocket");
+    generateVolumeBars();
+  };
+
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+
+    const currentPrice = Number(data.price);
+    priceEl.textContent = '$' + currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    // Update change
+    const change = parseFloat(data.change_percent);
+    if (change > 0) {
+      changeEl.classList.add('up');
+      changeEl.classList.remove('down');
+      changeEl.querySelector('.arrow').textContent = '▲';
+      changeTextEl.textContent = `+${change.toFixed(2)}%`;
+    } else {
+      changeEl.classList.add('down');
+      changeEl.classList.remove('up');
+      changeEl.querySelector('.arrow').textContent = '▼';
+      changeTextEl.textContent = `${change.toFixed(2)}%`;
+    }
+
+    // Update stats
+    high24hEl.textContent = '$' + (currentPrice + Math.random() * 500).toFixed(2);
+    low24hEl.textContent = '$' + (currentPrice - Math.random() * 500).toFixed(2);
+    volumeBtcEl.textContent = (Math.random() * 50000 + 20000).toFixed(2) + ' BTC';
+    volumeUsdtEl.textContent = '$' + (Math.random() * 2000000000 + 500000000).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    openPriceEl.textContent = '$' + (currentPrice - Math.random() * 100).toFixed(2);
+    closePriceEl.textContent = '$' + currentPrice.toFixed(2);
+    tradesCountEl.textContent = Math.floor(Math.random() * 50000 + 100000).toLocaleString();
+    avgPriceEl.textContent = '$' + currentPrice.toFixed(2);
+
+    // Update chart
+    priceHistory.push(currentPrice);
+    if (priceHistory.length > maxPoints) priceHistory.shift();
+
+    mainChart.data.labels = priceHistory.map((_, i) => i);
+    mainChart.data.datasets[0].data = priceHistory;
+    mainChart.update('none');
+
+    // Update order book periodically
+    if (Math.random() > 0.7) {
+      generateOrderBook(currentPrice);
+    }
+
+    // Add random trade
+    if (Math.random() > 0.5) {
+      addTrade(currentPrice, Math.random() > 0.5 ? 'buy' : 'sell');
+    }
+
+    // Update volume bars occasionally
+    if (Math.random() > 0.9) {
+      generateVolumeBars();
+    }
+  };
+
+  socket.onclose = () => {
+    console.log("❌ Disconnected from WebSocket");
+  };
+
+  socket.onerror = (error) => {
+    console.error("WebSocket error:", error);
+  };
+</script>
+
+</body>
+</html>
