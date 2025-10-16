@@ -1,4 +1,5 @@
 from fastapi import FastAPI,WebSocket
+# from app.main import app
 from app.config import settings
 from app.logger import logger
 from fastapi.responses import HTMLResponse
@@ -7,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
 from app.binance_listener import listen_to_binance
 from app.websocket_server import websocket_endpoint, broadcast_price_updates
+
 
 import asyncio
 
