@@ -10,7 +10,8 @@ from app.websocket_server import websocket_endpoint, broadcast_price_updates
 
 import asyncio
 
-app = FastAPI(title="Crypto Streamer")
+app = FastAPI()
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 @app.on_event("startup")
